@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "spec-version": "1.5"
+  },
+  "display-name": "Local File",
+  "icon": {
+    "type": "inline",
+    "arguments": {
+      "data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAAAAAA7VNdtAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAD/h4/MvwAAAAd0SU1FB+cCFBAjO3GqLwcAAALlSURBVEjHY/gPAr98GAgA4+v/YYCBSC0MzndI1sLgdAdTCwcfVsAKlGIG6XG8g6Gl+NQxbMANKBVugWQPkpap/7GCaKBU51VThD1IWiZj1fEvCijV9v+iKdweYrVA9TjeJkELVE/QVyK1tINYl82ALL3XRGqxys/NzS1wYmRg0H9DpBYEoJWWcJK1/F9aWAIBZaHMRGpBgN3sJGvZhaLFE6hlIklafjf7BvhvIUnL/z+/fv/6S5oWosAQ0fL9xZMnTx5/AjH/fXz2GMT5+PfF48dPvkPkPz58+ODdTiQtD7rcNVVUVJSmA4N7Z4q5ugqIM/Gjl5KK9iGIltkKSnJ52xFatutB01zr/1/NfLAEWPcFlA17wTr+JgKZyQhbzisywLWs44Kn2br/OUDS5QtIyz1lBgbGOXvhWkAyDOz8/Pw8vf/DgExGLlCJx936fzMHA4PAUZCWuUwMDNK398C0fAQVa0HbTwHB8/fGwJKx+NAJIDj++P9rI6BMBShwQKk2AhFir4E+YdsB8eVrfQYG1lV//0FDtQaoUufZ//8nhYDCK1C1sO+CqPnqBFQk5xoQUbnlM5B7SpiBgWXZ//+VIK3PsWv53wzzPEfQXaCD/EBu/vVcD+JA7Foe2cJDLBhozyJg1hU5v4KFgUHoBC4t/28lS7NCtHAC/fdUG8goCQISft/RteyGJ6TfNzbOnlKtAlTVAeRVAGlBbqCPFiOnsTf6ED+igFSg0mogfVIYYqXuM2QtX52BQsp5bW1tLUf/f5vT2tbW3lYgDxTrBqr6EQjRUouakrvhPm75/1YbzuHZB1K2DOwzsXOoWl55wlS1/X+rB9cS+w2k7KUhiB3xCy2/PEwXhtuiBdXAn/QE4qsmIIdlHUYW+326LyspKSlhy//P1TFxcXHxmZ1HfsBCPT0+ruwd1oz8DwhA1F8g+IcceBBx+hUXe5C1/Lt58hRBcHYyK3IxHs4jQBjwYFRJRAG6aQEAElfMA1n4L/0AAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDItMjBUMTY6MzU6NTMrMDA6MDCuRdqTAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAyLTIwVDE2OjM1OjUzKzAwOjAw3xhiLwAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyMy0wMi0yMFQxNjozNTo1OSswMDowMCx9HL4AAAAASUVORK5CYII="
+    }
+  },
+  "configuration-groups": [
+    {
+      "label": "Basic",
+      "properties": [
+        {
+          "widget-type": "textbox",
+          "label": "Reference Name",
+          "name": "referenceName",
+          "widget-attributes": {
+            "placeholder": "Used to uniquely identify this source for lineage, annotating metadata etc."
+          }
+        },
+        {
+          "label": "Path",
+          "name": "filePath",
+          "widget-type": "text-box"
+        }
+      ]
+    },
+    {
+      "label": "Advanced",
+      "properties": [
+        {
+          "label": "Generate Schema From CSV",
+          "name": "generateSchemaToggle",
+          "widget-type": "toggle",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "true"
+          }
+        },
+        {
+          "label": "Include Header Values in Records",
+          "name": "headersToggle",
+          "widget-type": "toggle",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
+        },
+        {
+          "name": "delimiter",
+          "widget-type": "select",
+          "widget-attributes": {
+            "default": ",",
+            "values": [
+              ",",
+              ";",
+              ":",
+              ".",
+              "|"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
