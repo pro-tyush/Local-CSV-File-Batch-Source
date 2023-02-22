@@ -27,7 +27,7 @@ import java.io.IOException;
 @Name(RESTConnector.NAME)
 @Description("Access data from countries REST API")
 public class RESTConnector implements Connector {
-    public static final String NAME = "RESTConnector";
+    public static final String NAME = "REST";
 
     private final RESTConnectorConfig config;
 
