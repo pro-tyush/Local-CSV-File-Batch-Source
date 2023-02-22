@@ -24,6 +24,62 @@
           }
         }
       ]
+    },
+    {
+      "label": "Authorisation",
+      "properties": [
+        {
+          "label": "Enable Authorisation",
+          "name": "enableAuthorisation",
+          "widget-type": "toggle",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
+        },
+        {
+          "widget-type": "password",
+          "label": "Enter API Key",
+          "name": "apiKey"
+        },
+        {
+          "name": "authType",
+          "label": "Authentication Type",
+          "widget-type": "select",
+          "widget-attributes": {
+            "default": "Bearer",
+            "values": [
+              "Bearer",
+              "JWT"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "name": "showApiKeyField",
+      "condition": {
+        "expression": "enableAuthorisation == true"
+      },
+      "show": [
+        {
+          "type": "property",
+          "name": "apiKey"
+        },
+        {
+          "type": "property",
+          "name": "authType"
+        }
+      ]
     }
   ]
 }

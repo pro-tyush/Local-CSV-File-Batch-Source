@@ -17,17 +17,41 @@
 package org.pratyush.connector;
 
 import io.cdap.cdap.api.annotation.Description;
+import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
+
 public class RESTConnectorConfig extends PluginConfig {
+    @Name("baseURL")
     @Description("Base Path of REST API.")
     private final String baseURL;
+    @Name("endPoint")
     @Description("Endpoint to trigger")
     private final String endPoint;
 
-    public RESTConnectorConfig(String baseURL, String endPoint) {
+    @Name("enableAuthorisation")
+    @Description("Enable if API requires authorisation")
+    private Boolean enableAuthorisation;
+
+    @Name("apiKey")
+    @Description("Enter api key")
+    @Nullable
+    private String apiKey;
+
+    @Name("authType")
+    @Description("Select authentication type")
+    @Nullable
+    private String authType;
+
+
+    public RESTConnectorConfig(String baseURL, String endPoint, Boolean enableAuthorisation, String apiKey, String authType) {
         this.baseURL = baseURL;
         this.endPoint = endPoint;
+        this.enableAuthorisation = enableAuthorisation;
+        this.apiKey = apiKey;
+        this.authType = authType;
     }
 
     public String getBaseURL() {
@@ -36,5 +60,17 @@ public class RESTConnectorConfig extends PluginConfig {
 
     public String getEndPoint() {
         return endPoint;
+    }
+
+    public Boolean getEnableAuthorisation() {
+        return enableAuthorisation;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public String getAuthType() {
+        return authType;
     }
 }
