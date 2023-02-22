@@ -18,8 +18,13 @@ package org.pratyush.connector;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.annotation.Plugin;
+import io.cdap.cdap.etl.api.FailureCollector;
+import io.cdap.cdap.etl.api.batch.BatchConnector;
 import io.cdap.cdap.etl.api.connector.*;
 import io.cdap.cdap.etl.api.validation.ValidationException;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import java.io.IOException;
 
@@ -31,23 +36,46 @@ public class RESTConnector implements Connector {
 
     private final RESTConnectorConfig config;
 
+    private final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfZW1haWwiOiJwcmF0eXVzaHNob3BwaW5nQGdtYWlsLmNvbSIsImFwaV90b2tlbiI6Ik5GYkh0YlNMdHpfbWtqci02S3l3WVUtcE5iZ2Zzakl2WGx0bWxPVi1ORUIwRVRRNW91ZmhQRW1QeFNOZE8zMC1FQ2MifSwiZXhwIjoxNjc3MTQzMTE2fQ.bdIYzHZr4efcn_3wW2sbZq4a5eVFxL0x5LJ8Jo3Y0HY";
+
     public RESTConnector(RESTConnectorConfig config) {
         this.config = config;
     }
 
     @Override
-    public void configure(ConnectorConfigurer configurer) throws IOException {
-        Connector.super.configure(configurer);
-    }
-
-    @Override
-    public void test(ConnectorContext connectorContext) throws ValidationException {
+    public void test(ConnectorContext connectorContext) throws ValidationException{
+        FailureCollector collector = connectorContext.getFailureCollector();
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(config.getBaseURL() + config.getEndPoint())
+                .header("Authorization", "Bearer " + API_KEY)
+                .build();
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            if (!response.isSuccessful()){
+                collector.addFailure("Request Failed","Check BaseUrl and Endpoint");
+            }
+        } catch (IOException e) {
+            collector.addFailure(e.getMessage(),null);
+        }
 
     }
 
     @Override
     public BrowseDetail browse(ConnectorContext connectorContext, BrowseRequest browseRequest) throws IOException {
-        return null;
+        BrowseDetail.Builder browseDetailBuilder = BrowseDetail.builder();
+
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(config.getBaseURL() + config.getEndPoint())
+                .header("Authorization", "Bearer " + API_KEY)
+                .build();
+        Response response = okHttpClient.newCall(request).execute();
+        String name = response.body().toString();
+        BrowseEntity.Builder entity = (BrowseEntity.builder(name, name, "template").
+                canBrowse(true).canSample(false));
+        browseDetailBuilder.addEntity(entity.build());
+        return browseDetailBuilder.build();
     }
 
     @Override
@@ -55,8 +83,4 @@ public class RESTConnector implements Connector {
         return null;
     }
 
-    @Override
-    public void close() throws IOException {
-        Connector.super.close();
-    }
 }
