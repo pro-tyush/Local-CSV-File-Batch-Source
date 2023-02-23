@@ -15,6 +15,9 @@
  */
 package org.pratyush.connector;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.annotation.Plugin;
@@ -23,8 +26,13 @@ import io.cdap.cdap.etl.api.connector.*;
 import io.cdap.cdap.etl.api.validation.ValidationException;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.pratyush.connector.entities.CountryEntity;
+import org.pratyush.connector.entities.StateEntity;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
 
 @Plugin(type = Connector.PLUGIN_TYPE)
 @Name(RESTConnector.NAME)
@@ -39,17 +47,17 @@ public class RESTConnector implements Connector {
     }
 
     @Override
-    public void test(ConnectorContext connectorContext) throws ValidationException{
+    public void test(ConnectorContext connectorContext) throws ValidationException {
         FailureCollector collector = connectorContext.getFailureCollector();
         OkHttpHandler okHttpHandler = new OkHttpHandler(connectorConfig);
         Request request = okHttpHandler.generateRequest();
         try {
             Response response = okHttpHandler.generateResponse(request);
-            if (!response.isSuccessful()){
-                collector.addFailure("Request Failed","Check BaseUrl, Endpoint and Auth(if enabled).");
+            if (!response.isSuccessful()) {
+                collector.addFailure("Request Failed", "Check BaseUrl, Endpoint and Auth(if enabled).");
             }
         } catch (IOException e) {
-            collector.addFailure(e.getMessage(),null);
+            collector.addFailure(e.getMessage(), null);
         }
 
     }
@@ -57,15 +65,51 @@ public class RESTConnector implements Connector {
     @Override
     public BrowseDetail browse(ConnectorContext connectorContext, BrowseRequest browseRequest) throws IOException {
         BrowseDetail.Builder browseDetailBuilder = BrowseDetail.builder();
+
         OkHttpHandler okHttpHandler = new OkHttpHandler(connectorConfig);
         Request request = okHttpHandler.generateRequest();
         Response response = okHttpHandler.generateResponse(request);
-        String name = response.body().toString();
-        BrowseEntity.Builder entity = (BrowseEntity.builder(name, name, "template").
-                canBrowse(true).canSample(false));
-        browseDetailBuilder.addEntity(entity.build());
-        return browseDetailBuilder.build();
+        String responseString = response.body().string();
+
+        String path = browseRequest.getPath();
+        if(path.length() < 2) return browseCountry(responseString, browseDetailBuilder);
+
+        request = okHttpHandler.generateRequest2(path.split("/")[1]);
+        response = okHttpHandler.generateResponse(request);
+        responseString = response.body().string();
+        return browseState(responseString, browseDetailBuilder);
+
+
     }
+
+    public BrowseDetail browseCountry(String responseString, BrowseDetail.Builder browseDetailBuilder) {
+        Gson gson = OkHttpHandler.getGsonObj();
+        CountryEntity[] countryEntities = gson.fromJson(responseString, CountryEntity[].class);
+        for (CountryEntity countryEntity : countryEntities) {
+            BrowseEntity.Builder entityBuilder = BrowseEntity.builder(
+                    countryEntity.getCountry_name(), "/" + countryEntity.getCountry_name(), "directory"
+            ).canSample(false).canBrowse(true);
+            browseDetailBuilder.addEntity(entityBuilder.build());
+        }
+        return browseDetailBuilder.setTotalCount(countryEntities.length).build();
+    }
+
+    public BrowseDetail browseState(String responseString, BrowseDetail.Builder browseDetailBuilder) {
+        Gson gson = OkHttpHandler.getGsonObj();
+        StateEntity[] stateEntities = gson.fromJson(responseString, StateEntity[].class);
+        for (StateEntity stateEntity : stateEntities) {
+            BrowseEntity.Builder entityBuilder = BrowseEntity.builder(
+                    stateEntity.getState_name(), stateEntity.getState_name(), "file"
+            ).canSample(true).canBrowse(false);
+            browseDetailBuilder.addEntity(entityBuilder.build());
+        }
+        return browseDetailBuilder.setTotalCount(stateEntities.length).build();
+    }
+
+    public BrowseDetail browseFile() {
+        return null;
+    }
+
 
     @Override
     public ConnectorSpec generateSpec(ConnectorContext connectorContext, ConnectorSpecRequest connectorSpecRequest) throws IOException {

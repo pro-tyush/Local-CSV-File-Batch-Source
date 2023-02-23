@@ -15,23 +15,39 @@
  */
 package org.pratyush.connector;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
 
 public class OkHttpHandler {
     private static final OkHttpClient okHttpClient;
+    private static final Gson gson;
 
     static {
         okHttpClient = new OkHttpClient();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.setPrettyPrinting();
+        gson = gsonBuilder.create();
+
+
     }
 
     private RESTConnectorConfig connectorConfig;
 
     public OkHttpHandler(RESTConnectorConfig connectorConfig) {
         this.connectorConfig = connectorConfig;
+    }
+
+    public static Gson getGsonObj(){
+        return gson;
     }
 
     public Request generateRequest() {
@@ -47,9 +63,24 @@ public class OkHttpHandler {
         return requestBuilder.build();
     }
 
+    public Request generateRequest2(String country) {
+        StringBuilder baseUrl = new StringBuilder(connectorConfig.getBaseURL());
+
+        if (!baseUrl.toString().endsWith("/"))
+            baseUrl.append("/states/"+country);
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(baseUrl.toString());
+        if (connectorConfig.getEnableAuthorisation()) {
+            requestBuilder.addHeader("Authorization", connectorConfig.getAuthType() + " " + connectorConfig.getApiKey());
+        }
+        return requestBuilder.build();
+    }
+
     public Response generateResponse(Request request) throws IOException {
         return okHttpClient.newCall(request).execute();
     }
+
+
 
 
 }
