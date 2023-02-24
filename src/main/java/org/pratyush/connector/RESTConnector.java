@@ -71,17 +71,17 @@ public class RESTConnector implements DirectConnector {
         String jsonResponse = response.body().string();
 
         Gson gson = new GsonBuilder().create();
-        LocalFileEntity[] fileObjs = gson.fromJson(jsonResponse, LocalFileEntity[].class);
+        LocalFileEntity[] fileEntities = gson.fromJson(jsonResponse, LocalFileEntity[].class);
         BrowseDetail.Builder builder = BrowseDetail.builder();
-        for (LocalFileEntity x : fileObjs) {
+        for (LocalFileEntity fileEntity : fileEntities) {
             BrowseEntity.Builder entity =
                     BrowseEntity.builder(
-                                    x.getName(), path + "/" + x.getName(), x.getDir() ? "directory" : "file")
-                            .canBrowse(x.getDir())
-                            .canSample(!x.getDir());
+                                    fileEntity.getName(), path + "/" + fileEntity.getName(), fileEntity.isDir() ? "directory" : "file")
+                            .canBrowse(fileEntity.isDir())
+                            .canSample(!fileEntity.isDir());
             builder.addEntity(entity.build());
         }
-        return builder.setTotalCount(fileObjs.length).build();
+        return builder.setTotalCount(fileEntities.length).build();
 
     }
 

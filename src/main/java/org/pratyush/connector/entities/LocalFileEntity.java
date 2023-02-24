@@ -24,7 +24,7 @@ public class LocalFileEntity {
         return name;
     }
 
-    public Boolean getDir() {
+    public Boolean isDir() {
         return dir;
     }
 
