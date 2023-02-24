@@ -17,15 +17,11 @@ package org.pratyush.connector;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
 
 public class OkHttpHandler {
     private static final OkHttpClient okHttpClient;
@@ -36,8 +32,6 @@ public class OkHttpHandler {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setPrettyPrinting();
         gson = gsonBuilder.create();
-
-
     }
 
     private RESTConnectorConfig connectorConfig;
@@ -46,7 +40,7 @@ public class OkHttpHandler {
         this.connectorConfig = connectorConfig;
     }
 
-    public static Gson getGsonObj(){
+    public  Gson getGsonObj(){
         return gson;
     }
 
@@ -79,8 +73,5 @@ public class OkHttpHandler {
     public Response generateResponse(Request request) throws IOException {
         return okHttpClient.newCall(request).execute();
     }
-
-
-
 
 }
