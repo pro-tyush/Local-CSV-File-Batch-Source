@@ -61,7 +61,7 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
     public static final String NAME = "LocalFile";
     private final LocalFilePluginConfig pluginConfig;
 
-    private static final Schema DEFAULT_SCHEMA;
+    public static final Schema DEFAULT_SCHEMA;
 
     static {
         DEFAULT_SCHEMA = Schema.recordOf("event", Schema.Field.of("offset", Schema.of(Schema.Type.LONG)), Schema.Field.of("body", Schema.of(Schema.Type.STRING)));
