@@ -38,8 +38,10 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.pratyush.util.CsvHelper;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
@@ -48,7 +50,7 @@ import java.util.List;
 
 @Plugin(type = BatchSource.PLUGIN_TYPE)
 @Name(LocalFileBatchSource.NAME)
-@Description("Reads data from Local File.")
+@Description("Reads data from Local File, generates schemas for csv")
 public class LocalFileBatchSource extends BatchSource<LongWritable, Text, StructuredRecord> {
 
     public static final String NAME = "LocalFile";
@@ -89,58 +91,38 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
         batchSourceContext.setInput(Input.of(pluginConfig.getReferenceName(), inputFormat));
     }
 
-    private Schema getOutputSchema() {
+    private Schema getOutputSchema() throws IOException {
         if (pluginConfig.getGenerateSchemaToggle()) {
-            return getSchemaFromHeader();
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(pluginConfig.getFilePath()));
+                CsvHelper csvHelper = new CsvHelper();
+                return csvHelper.generateSchemaFromCsv(bufferedReader.readLine(), pluginConfig.getDelimiter());
         } else
             return DEFAULT_SCHEMA;
     }
 
-    private Schema getSchemaFromHeader() {
-        List<String> firstColumnValues = new ArrayList<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader(pluginConfig.getFilePath()))) {
-            String line = br.readLine();
-            if (line != null) {
-                String[] values = line.split(",");
-                for (String value : values) {
-                    firstColumnValues.add(value.trim());
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        List<Schema.Field> schemaFields = new ArrayList<>();
-
-        for (String headerName : firstColumnValues) {
-            schemaFields.add(Schema.Field.of(headerName, Schema.of(Schema.Type.STRING)));
-        }
-
-
-        return Schema.recordOf("event", schemaFields);
-    }
 
     @Override
     public void configurePipeline(PipelineConfigurer pipelineConfigurer) {
-        super.configurePipeline(pipelineConfigurer);
-        pipelineConfigurer.getStageConfigurer().setOutputSchema(getOutputSchema());
+        FailureCollector failureCollector = pipelineConfigurer.getStageConfigurer().getFailureCollector();
         pluginConfig.validate(pipelineConfigurer.getStageConfigurer().getFailureCollector());
-
+        try {
+            pipelineConfigurer.getStageConfigurer().setOutputSchema(getOutputSchema());
+        } catch (IOException e) {
+            failureCollector.addFailure(e.getMessage(), null);
+            failureCollector.getOrThrowException();
+        }
     }
 
     @Override
     public void transform(KeyValue<LongWritable, Text> input, Emitter<StructuredRecord> emitter) throws Exception {
         StructuredRecord.Builder builder = StructuredRecord.builder(getOutputSchema());
 
-        if (!pluginConfig.includeHeaders()) {
-            if (input.getKey().get() == 0) { //skip headers
-                return;
-            }
+        // Skip headers if specified in config
+        if (!pluginConfig.includeHeaders() && input.getKey().get() == 0) {
+            return;
         }
 
         if (pluginConfig.getGenerateSchemaToggle()) {
-
             int idx = 0;
             String[] valuesSplit = input.getValue().toString().split(pluginConfig.getDelimiter());
             for (Schema.Field f : getOutputSchema().getFields()) {

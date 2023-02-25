@@ -50,6 +50,8 @@ public class HTTPConnector implements DirectConnector {
     private static final String ENDPOINT_PATH_SEPARATOR = "/";
     private static final String CSV_EXT = ".csv";
 
+    private static final int MAX_SAMPLE_LIMIT = 1000;
+
 
     public HTTPConnector(HTTPConnectorConfig connectorConfig) {
         this.connectorConfig = connectorConfig;
@@ -130,7 +132,8 @@ public class HTTPConnector implements DirectConnector {
         CsvHelper csvHelper = new CsvHelper();
         Schema schema = csvHelper.generateSchemaFromCsv(csvString, ",");
         List<StructuredRecord> structuredRecordList = new ArrayList<>();
-        for (int i = 1; i < lines.length; i++) {
+        int limit = Math.min(lines.length, MAX_SAMPLE_LIMIT);
+        for (int i = 1; i < limit; i++) {
             String[] splitComma = lines[i].split(",");
             StructuredRecord.Builder builder = StructuredRecord.builder(schema);
             for (int j = 0; j < splitComma.length; j++) {
@@ -146,8 +149,9 @@ public class HTTPConnector implements DirectConnector {
         long offset = 0;
         Schema schema = LocalFileBatchSource.DEFAULT_SCHEMA;
         List<StructuredRecord> structuredRecordList = new ArrayList<>();
+        int limit = Math.min(lines.length, MAX_SAMPLE_LIMIT);
 
-        for (int i = 0; i < lines.length; i++) {
+        for (int i = 0; i < limit; i++) {
             StructuredRecord.Builder builder = StructuredRecord.builder(schema);
             builder.set(schema.getFields().get(0).getName(), offset);
             builder.set(schema.getFields().get(1).getName(), lines[i]);
