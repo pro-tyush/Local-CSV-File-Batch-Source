@@ -71,15 +71,6 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
     public void prepareRun(BatchSourceContext batchSourceContext) throws Exception {
         FailureCollector failureCollector = batchSourceContext.getFailureCollector();
         failureCollector.getOrThrowException();
-        Schema outputSchema = batchSourceContext.getOutputSchema();
-
-        if (outputSchema == null) {
-            outputSchema = getOutputSchema();
-        }
-
-        if (outputSchema == null) {
-            throw new IllegalArgumentException("Output Schema is Null.");
-        }
         setJobConfig(batchSourceContext);
     }
 
