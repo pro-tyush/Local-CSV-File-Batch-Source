@@ -97,9 +97,10 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
 
     private Schema getOutputSchema() throws IOException {
         if (pluginConfig.getGenerateSchemaToggle()) {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(pluginConfig.getFilePath()));
-            CsvHelper csvHelper = new CsvHelper();
-            return csvHelper.generateSchemaFromCsv(bufferedReader.readLine(), pluginConfig.getDelimiter());
+            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(pluginConfig.getFilePath()))) {
+                CsvHelper csvHelper = new CsvHelper();
+                return csvHelper.generateSchemaFromCsv(bufferedReader.readLine(), pluginConfig.getDelimiter());
+            }
         } else
             return DEFAULT_SCHEMA;
     }
