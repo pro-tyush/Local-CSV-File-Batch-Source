@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CsvHelper {
+
+    public static final String CSV_EXT = ".csv";
     public Schema generateSchemaFromCsv(String csvString, String delimiter) {
-        String headerLine = csvString.split("\n")[0];
+        String headerLine = csvString.split("\n")[0]; //if csvString has multiple lines consider first
         String[] headerValues = headerLine.split(delimiter);
 
         List<Schema.Field> schemaFields = new ArrayList<>();
@@ -32,6 +34,10 @@ public class CsvHelper {
             schemaFields.add(Schema.Field.of(headerName, Schema.of(Schema.Type.STRING)));
         }
         return Schema.recordOf("event", schemaFields);
+    }
+
+    public boolean isCsvFile(String path){
+        return path.endsWith(CSV_EXT);
     }
 }
 

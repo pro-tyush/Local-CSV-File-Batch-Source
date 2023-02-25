@@ -45,11 +45,8 @@ public class HTTPConnector implements DirectConnector {
     public static final String NAME = "HTTP";
     private final HttpGsonHandler okHttpHandler;
     private String baseUrl;
-
     private final HTTPConnectorConfig connectorConfig;
-    private static final String ENDPOINT_PATH_SEPARATOR = "/";
-    private static final String CSV_EXT = ".csv";
-
+    private static final String PATH_SEPARATOR = "/";
     private static final int MAX_SAMPLE_LIMIT = 1000;
 
 
@@ -60,8 +57,8 @@ public class HTTPConnector implements DirectConnector {
     }
 
     private String getBaseUrl(String baseUrl) {
-        if (!baseUrl.endsWith(ENDPOINT_PATH_SEPARATOR)) {
-            return baseUrl + ENDPOINT_PATH_SEPARATOR;
+        if (!baseUrl.endsWith(PATH_SEPARATOR)) {
+            return baseUrl + PATH_SEPARATOR;
         }
         return baseUrl;
     }
@@ -73,7 +70,7 @@ public class HTTPConnector implements DirectConnector {
         Request request = okHttpHandler.generateRequest(baseUrl + connectorConfig.getEndPoint());
         try (Response response = okHttpHandler.generateResponse(request)) {
             if (!response.isSuccessful()) {
-                collector.addFailure("Request Failed", "Check BaseUrl, Endpoint" + (connectorConfig.ifRequiresAuth() ? " and Auth" : ""));
+                collector.addFailure("Request Failed", "Check BaseUrl, Endpoint" + (connectorConfig.isAuthReqd() ? " and Auth" : ""));
             }
         } catch (IOException e) {
             collector.addFailure(e.getMessage(), null);
@@ -83,7 +80,7 @@ public class HTTPConnector implements DirectConnector {
 
     public BrowseDetail browse(ConnectorContext connectorContext, BrowseRequest browseRequest) throws IOException {
         String path = browseRequest.getPath();
-        Request request = okHttpHandler.generateRequest(baseUrl + ENDPOINT_PATH_SEPARATOR + path);
+        Request request = okHttpHandler.generateRequest(baseUrl + PATH_SEPARATOR + path);
         Response response = okHttpHandler.generateResponse(request);
         String responseString = response.body().string();
         Gson gson = okHttpHandler.getGsonObj();
@@ -92,7 +89,7 @@ public class HTTPConnector implements DirectConnector {
         }.getType());
         BrowseDetail.Builder builder = BrowseDetail.builder();
         for (LocalFileEntity fileEntity : fileEntities) {
-            String separator = path.endsWith(ENDPOINT_PATH_SEPARATOR) ? "" : ENDPOINT_PATH_SEPARATOR;
+            String separator = path.endsWith(PATH_SEPARATOR) ? "" : PATH_SEPARATOR;
             String entityPath = path + separator + fileEntity.getName();
             String entityType = fileEntity.isDir() ? "directory" : "file";
             BrowseEntity.Builder entity = BrowseEntity.builder(fileEntity.getName(), entityPath, entityType)
@@ -108,7 +105,7 @@ public class HTTPConnector implements DirectConnector {
     public ConnectorSpec generateSpec(ConnectorContext connectorContext, ConnectorSpecRequest connectorSpecRequest) {
         String localPath = connectorSpecRequest.getPath();
         Map<String, String> pluginProps = new HashMap<>();
-        pluginProps.put(LocalFilePluginConfig.NAME_REFERENCE_NAME, localPath.substring(localPath.lastIndexOf(ENDPOINT_PATH_SEPARATOR) + 1));
+        pluginProps.put(LocalFilePluginConfig.NAME_REFERENCE_NAME, localPath.substring(localPath.lastIndexOf(PATH_SEPARATOR) + 1));
         pluginProps.put(LocalFilePluginConfig.NAME_FILE_PATH, localPath);
 
         PluginSpec pluginSpec = new PluginSpec(LocalFileBatchSource.NAME, LocalFileBatchSource.PLUGIN_TYPE, pluginProps);
@@ -120,42 +117,40 @@ public class HTTPConnector implements DirectConnector {
         Request request = okHttpHandler.generateRequest(baseUrl + sampleRequest.getPath());
         Response response = okHttpHandler.generateResponse(request);
         String responseString = response.body().string();
-        boolean isCsv = sampleRequest.getPath().endsWith(CSV_EXT);
-        if (isCsv)
-            return sampleCsv(responseString);
+        String[] responseLines = responseString.split("\n");
+        CsvHelper csvHelper = new CsvHelper();
+
+        int sampleLimit = Math.min(responseLines.length, MAX_SAMPLE_LIMIT);
+        if (csvHelper.isCsvFile(sampleRequest.getPath()))
+            return sampleCsv(responseLines, sampleLimit, csvHelper);
         else
-            return sampleFile(responseString);
+            return sampleFile(responseLines, sampleLimit);
     }
 
-    private List<StructuredRecord> sampleCsv(String csvString) {
-        String[] lines = csvString.split("\n");
-        CsvHelper csvHelper = new CsvHelper();
-        Schema schema = csvHelper.generateSchemaFromCsv(csvString, ",");
+    private List<StructuredRecord> sampleCsv(String[] csvLines, int sampleLimit, CsvHelper csvHelper) {
+        Schema schema = csvHelper.generateSchemaFromCsv(csvLines[0], ",");
         List<StructuredRecord> structuredRecordList = new ArrayList<>();
-        int limit = Math.min(lines.length, MAX_SAMPLE_LIMIT);
-        for (int i = 1; i < limit; i++) {
-            String[] splitComma = lines[i].split(",");
+        for (int i = 1; i < sampleLimit; i++) {
+            String[] splitValues = csvLines[i].split(",");
             StructuredRecord.Builder builder = StructuredRecord.builder(schema);
-            for (int j = 0; j < splitComma.length; j++) {
-                builder.set(schema.getFields().get(j).getName(), splitComma[j]);
+            for (int j = 0; j < splitValues.length; j++) {
+                builder.set(schema.getFields().get(j).getName(), splitValues[j]);
             }
             structuredRecordList.add(builder.build());
         }
         return structuredRecordList;
     }
 
-    private List<StructuredRecord> sampleFile(String responseString) {
-        String[] lines = responseString.split("\n");
+    private List<StructuredRecord> sampleFile(String[] responseLines, int sampleLimit) {
         long offset = 0;
         Schema schema = LocalFileBatchSource.DEFAULT_SCHEMA;
         List<StructuredRecord> structuredRecordList = new ArrayList<>();
-        int limit = Math.min(lines.length, MAX_SAMPLE_LIMIT);
 
-        for (int i = 0; i < limit; i++) {
+        for (int i = 0; i < sampleLimit; i++) {
             StructuredRecord.Builder builder = StructuredRecord.builder(schema);
             builder.set(schema.getFields().get(0).getName(), offset);
-            builder.set(schema.getFields().get(1).getName(), lines[i]);
-            offset += lines[i].length();
+            builder.set(schema.getFields().get(1).getName(), responseLines[i]);
+            offset += responseLines[i].length();
             structuredRecordList.add(builder.build());
         }
         return structuredRecordList;

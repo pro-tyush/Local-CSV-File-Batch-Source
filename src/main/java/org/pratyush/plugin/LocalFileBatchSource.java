@@ -45,12 +45,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Plugin(type = BatchSource.PLUGIN_TYPE)
 @Name(LocalFileBatchSource.NAME)
-@Description("Reads data from Local File, generates schemas for csv")
+@Description("Reads data from Local File, generates schemas for csv only.")
 public class LocalFileBatchSource extends BatchSource<LongWritable, Text, StructuredRecord> {
 
     public static final String NAME = "LocalFile";
@@ -79,7 +80,10 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
         if (outputSchema == null) {
             throw new IllegalArgumentException("Output Schema is Null.");
         }
+        setJobConfig(batchSourceContext);
+    }
 
+    private void setJobConfig(BatchSourceContext batchSourceContext) throws IOException, URISyntaxException {
         Job hadoopJob = JobUtils.createInstance();
         Gson gson = new GsonBuilder().create();
         Configuration jobConfiguration = hadoopJob.getConfiguration();
@@ -93,9 +97,9 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
 
     private Schema getOutputSchema() throws IOException {
         if (pluginConfig.getGenerateSchemaToggle()) {
-                BufferedReader bufferedReader = new BufferedReader(new FileReader(pluginConfig.getFilePath()));
-                CsvHelper csvHelper = new CsvHelper();
-                return csvHelper.generateSchemaFromCsv(bufferedReader.readLine(), pluginConfig.getDelimiter());
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(pluginConfig.getFilePath()));
+            CsvHelper csvHelper = new CsvHelper();
+            return csvHelper.generateSchemaFromCsv(bufferedReader.readLine(), pluginConfig.getDelimiter());
         } else
             return DEFAULT_SCHEMA;
     }
@@ -118,23 +122,30 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
         StructuredRecord.Builder builder = StructuredRecord.builder(getOutputSchema());
 
         // Skip headers if specified in config
-        if (!pluginConfig.includeHeaders() && input.getKey().get() == 0) {
+        if (!pluginConfig.includeHeaders() && input.getKey().get() == 0)
             return;
-        }
 
-        if (pluginConfig.getGenerateSchemaToggle()) {
-            int idx = 0;
-            String[] valuesSplit = input.getValue().toString().split(pluginConfig.getDelimiter());
-            for (Schema.Field f : getOutputSchema().getFields()) {
-                builder.set(f.getName(), valuesSplit[idx]);
-                idx++;
-            }
-        } else { //Default
-            builder.set(getOutputSchema().getFields().get(0).getName(), input.getKey().get());
-            builder.set(getOutputSchema().getFields().get(1).getName(), input.getValue().toString());
-        }
+        if (pluginConfig.getGenerateSchemaToggle())
+            csvTransform(input, builder);
+
+        else
+            fileTransform(input, builder);
+
         emitter.emit(builder.build());
+    }
 
+    private void csvTransform(KeyValue<LongWritable, Text> input, StructuredRecord.Builder builder) throws IOException {
+        int idx = 0;
+        String[] valuesSplit = input.getValue().toString().split(pluginConfig.getDelimiter());
+        for (Schema.Field field : getOutputSchema().getFields()) {
+            builder.set(field.getName(), valuesSplit[idx]);
+            idx++;
+        }
+    }
+
+    private void fileTransform(KeyValue<LongWritable, Text> input, StructuredRecord.Builder builder) throws IOException {
+        builder.set(getOutputSchema().getFields().get(0).getName(), input.getKey().get());
+        builder.set(getOutputSchema().getFields().get(1).getName(), input.getValue().toString());
     }
 
 

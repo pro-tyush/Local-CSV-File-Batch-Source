@@ -49,7 +49,7 @@ public class HttpGsonHandler {
     public Request generateRequest(String url) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url);
-        if (connectorConfig.ifRequiresAuth()) {
+        if (connectorConfig.isAuthReqd()) {
             requestBuilder.addHeader(AUTH_HEADER, connectorConfig.getAuthType() + " " + connectorConfig.getApiKey());
         }
         return requestBuilder.build();

@@ -82,10 +82,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/pratyush/plugin/LocalFilePluginConfig.java</url>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/pratyush/connector/entities/LocalFileEntity.java</url>
-          <option name="timeStamp" value="33" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

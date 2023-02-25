@@ -23,23 +23,36 @@ import io.cdap.cdap.api.plugin.PluginConfig;
 import javax.annotation.Nullable;
 
 public class HTTPConnectorConfig extends PluginConfig {
-    @Name("baseURL")
+    public static final String NAME_BASE_URL = "baseURL";
+    public static final String NAME_ENDPOINT = "endPoint";
+
+    public static final String NAME_ENABLE_AUTH = "enableAuthorisation";
+
+    public static final String NAME_API_KEY = "apiKey";
+
+    public static final String NAME_AUTH_TYPE = "authType";
+
+
+
+
+
+    @Name(NAME_BASE_URL)
     @Description("Enter HTTP Base Url. Ex-https://example.com")
     private final String baseURL;
-    @Name("endPoint")
-    @Description("Enter endpoint. Ex-users")
+    @Name(NAME_ENDPOINT)
+    @Description("Enter endpoint. Ex-users/")
     private final String endPoint;
 
-    @Name("enableAuthorisation")
+    @Name(NAME_ENABLE_AUTH)
     @Description("Enable if API requires authorisation")
     private Boolean enableAuthorisation;
 
-    @Name("apiKey")
+    @Name(NAME_API_KEY)
     @Description("Enter api key")
     @Nullable
     private String apiKey;
 
-    @Name("authType")
+    @Name(NAME_AUTH_TYPE)
     @Description("Select authentication type")
     @Nullable
     private String authType;
@@ -61,7 +74,7 @@ public class HTTPConnectorConfig extends PluginConfig {
         return endPoint;
     }
 
-    public Boolean ifRequiresAuth() {
+    public Boolean isAuthReqd() {
         return enableAuthorisation;
     }
 
