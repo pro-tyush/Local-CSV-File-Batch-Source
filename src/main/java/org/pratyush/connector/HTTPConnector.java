@@ -49,7 +49,6 @@ public class HTTPConnector implements DirectConnector {
     private static final String PATH_SEPARATOR = "/";
     private static final int MAX_SAMPLE_LIMIT = 1000;
 
-
     public HTTPConnector(HTTPConnectorConfig connectorConfig) {
         this.connectorConfig = connectorConfig;
         okHttpHandler = new HttpGsonHandler(connectorConfig);
@@ -62,7 +61,6 @@ public class HTTPConnector implements DirectConnector {
         }
         return baseUrl;
     }
-
 
     @Override
     public void test(ConnectorContext connectorContext) throws ValidationException {
@@ -155,6 +153,5 @@ public class HTTPConnector implements DirectConnector {
         }
         return structuredRecordList;
     }
-
 
 }

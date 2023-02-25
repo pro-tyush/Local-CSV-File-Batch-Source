@@ -26,7 +26,6 @@ import java.io.IOException;
 public class HttpGsonHandler {
     private static final OkHttpClient okHttpClient;
     private static final Gson gson;
-
     private static final  String AUTH_HEADER = "Authorization";
 
     static {

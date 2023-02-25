@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CsvHelper {
-
     public static final String CSV_EXT = ".csv";
     public Schema generateSchemaFromCsv(String csvString, String delimiter) {
         String headerLine = csvString.split("\n")[0]; //if csvString has multiple lines consider first

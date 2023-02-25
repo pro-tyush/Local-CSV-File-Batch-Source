@@ -30,8 +30,6 @@ public class LocalFilePluginConfig extends PluginConfig {
     public static final String NAME_HEADERS_TOGGLE = "headersToggle";
     public static final String NAME_DELIMITER = "delimiter";
 
-
-
     @Name(NAME_REFERENCE_NAME)
     @Description("This will be used to uniquely identify this source/sink for lineage, annotating metadata, etc.")
     public String referenceName;
@@ -51,7 +49,6 @@ public class LocalFilePluginConfig extends PluginConfig {
     @Name(NAME_DELIMITER)
     @Description("Choose delimiter symbol used in CSV File.")
     private String delimiter;
-
 
     public LocalFilePluginConfig(String referenceName, String filePath, Boolean generateSchemaToggle, Boolean headersToggle, String delimiter) {
         this.referenceName = referenceName;

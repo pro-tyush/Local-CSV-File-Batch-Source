@@ -140,5 +140,4 @@ public class LocalFileBatchSource extends BatchSource<LongWritable, Text, Struct
         builder.set(getOutputSchema().getFields().get(1).getName(), input.getValue().toString());
     }
 
-
 }

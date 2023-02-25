@@ -25,16 +25,9 @@ import javax.annotation.Nullable;
 public class HTTPConnectorConfig extends PluginConfig {
     public static final String NAME_BASE_URL = "baseURL";
     public static final String NAME_ENDPOINT = "endPoint";
-
     public static final String NAME_ENABLE_AUTH = "enableAuthorisation";
-
     public static final String NAME_API_KEY = "apiKey";
-
     public static final String NAME_AUTH_TYPE = "authType";
-
-
-
-
 
     @Name(NAME_BASE_URL)
     @Description("Enter HTTP Base Url. Ex-https://example.com")
@@ -56,7 +49,6 @@ public class HTTPConnectorConfig extends PluginConfig {
     @Description("Select authentication type")
     @Nullable
     private String authType;
-
 
     public HTTPConnectorConfig(String baseURL, String endPoint, Boolean enableAuthorisation, String apiKey, String authType) {
         this.baseURL = baseURL;
