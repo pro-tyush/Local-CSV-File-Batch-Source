@@ -2,7 +2,7 @@
   "metadata": {
     "spec-version": "1.5"
   },
-  "display-name": "REST",
+  "display-name": "HTTP",
   "configuration-groups": [
     {
       "label": "Basic",
@@ -20,7 +20,7 @@
           "label": "Endpoint",
           "name": "endPoint",
           "widget-attributes": {
-            "placeholder": "Enter REST Endpoint."
+            "placeholder": "Enter endpoint."
           }
         }
       ]

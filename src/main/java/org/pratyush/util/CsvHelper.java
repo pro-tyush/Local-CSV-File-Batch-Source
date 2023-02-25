@@ -13,16 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.pratyush.connector.entities;
 
-public class CityEntity {
-    String city_name;
+package org.pratyush.util;
 
-    public String getCity_name() {
-        return city_name;
-    }
+import io.cdap.cdap.api.data.schema.Schema;
 
-    public void setCity_name(String city_name) {
-        this.city_name = city_name;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CsvHelper {
+    public Schema generateSchemaFromCsv(String csvString, String delimiter) {
+        String headerLine = csvString.split("\n")[0];
+        String[] headerValues = headerLine.split(delimiter);
+
+        List<Schema.Field> schemaFields = new ArrayList<>();
+
+        for (String headerName : headerValues) {
+            schemaFields.add(Schema.Field.of(headerName, Schema.of(Schema.Type.STRING)));
+        }
+        return Schema.recordOf("event", schemaFields);
     }
 }
+

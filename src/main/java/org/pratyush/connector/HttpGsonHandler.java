@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Cask Data, Inc.
+ * Copyright © 2023 Cask Data, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,9 +23,11 @@ import okhttp3.Response;
 
 import java.io.IOException;
 
-public class OkHttpHandler {
+public class HttpGsonHandler {
     private static final OkHttpClient okHttpClient;
     private static final Gson gson;
+
+    private static final  String AUTH_HEADER = "Authorization";
 
     static {
         okHttpClient = new OkHttpClient();
@@ -34,9 +36,9 @@ public class OkHttpHandler {
         gson = gsonBuilder.create();
     }
 
-    private RESTConnectorConfig connectorConfig;
+    private HTTPConnectorConfig connectorConfig;
 
-    public OkHttpHandler(RESTConnectorConfig connectorConfig) {
+    public HttpGsonHandler(HTTPConnectorConfig connectorConfig) {
         this.connectorConfig = connectorConfig;
     }
 
@@ -44,28 +46,11 @@ public class OkHttpHandler {
         return gson;
     }
 
-    public Request generateRequest() {
-        StringBuilder baseUrl = new StringBuilder(connectorConfig.getBaseURL());
-
-        if (!baseUrl.toString().endsWith("/"))
-            baseUrl.append("/");
+    public Request generateRequest(String url) {
         Request.Builder requestBuilder = new Request.Builder()
-                .url(baseUrl + connectorConfig.getEndPoint());
-        if (connectorConfig.getEnableAuthorisation()) {
-            requestBuilder.addHeader("Authorization", connectorConfig.getAuthType() + " " + connectorConfig.getApiKey());
-        }
-        return requestBuilder.build();
-    }
-
-    public Request generateRequest2(String country) {
-        StringBuilder baseUrl = new StringBuilder(connectorConfig.getBaseURL());
-
-        if (!baseUrl.toString().endsWith("/"))
-            baseUrl.append("/states/"+country);
-        Request.Builder requestBuilder = new Request.Builder()
-                .url(baseUrl.toString());
-        if (connectorConfig.getEnableAuthorisation()) {
-            requestBuilder.addHeader("Authorization", connectorConfig.getAuthType() + " " + connectorConfig.getApiKey());
+                .url(url);
+        if (connectorConfig.ifRequiresAuth()) {
+            requestBuilder.addHeader(AUTH_HEADER, connectorConfig.getAuthType() + " " + connectorConfig.getApiKey());
         }
         return requestBuilder.build();
     }

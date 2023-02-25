@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Cask Data, Inc.
+ * Copyright © 2023 Cask Data, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,14 +21,13 @@ import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 
-public class RESTConnectorConfig extends PluginConfig {
+public class HTTPConnectorConfig extends PluginConfig {
     @Name("baseURL")
-    @Description("Base Path of REST API.")
+    @Description("Enter HTTP Base Url. Ex-https://example.com")
     private final String baseURL;
     @Name("endPoint")
-    @Description("Endpoint to trigger")
+    @Description("Enter endpoint. Ex-users")
     private final String endPoint;
 
     @Name("enableAuthorisation")
@@ -46,7 +45,7 @@ public class RESTConnectorConfig extends PluginConfig {
     private String authType;
 
 
-    public RESTConnectorConfig(String baseURL, String endPoint, Boolean enableAuthorisation, String apiKey, String authType) {
+    public HTTPConnectorConfig(String baseURL, String endPoint, Boolean enableAuthorisation, String apiKey, String authType) {
         this.baseURL = baseURL;
         this.endPoint = endPoint;
         this.enableAuthorisation = enableAuthorisation;
@@ -62,7 +61,7 @@ public class RESTConnectorConfig extends PluginConfig {
         return endPoint;
     }
 
-    public Boolean getEnableAuthorisation() {
+    public Boolean ifRequiresAuth() {
         return enableAuthorisation;
     }
 

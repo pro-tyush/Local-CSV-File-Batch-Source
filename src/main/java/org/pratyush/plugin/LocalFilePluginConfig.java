@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.pratyush.config;
+package org.pratyush.plugin;
 
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Name;
@@ -24,23 +24,31 @@ import io.cdap.cdap.etl.api.FailureCollector;
 import java.io.File;
 
 public class LocalFilePluginConfig extends PluginConfig {
-    @Name("referenceName")
+    public static final String NAME_REFERENCE_NAME = "referenceName";
+    public static final String NAME_FILE_PATH = "filePath";
+    public static final String NAME_GEN_SCHEMA_TOGGLE = "generateSchemaToggle";
+    public static final String NAME_HEADERS_TOGGLE = "headersToggle";
+    public static final String NAME_DELIMITER = "delimiter";
+
+
+
+    @Name(NAME_REFERENCE_NAME)
     @Description("This will be used to uniquely identify this source/sink for lineage, annotating metadata, etc.")
     public String referenceName;
 
-    @Name("filePath")
+    @Name(NAME_FILE_PATH)
     @Description("Enter Local File Path.")
     private String filePath;
 
-    @Name("generateSchemaToggle")
+    @Name(NAME_GEN_SCHEMA_TOGGLE)
     @Description("Generate Schema From CSV Header(i.e. First Column)")
     private Boolean generateSchemaToggle;
 
-    @Name("headersToggle")
+    @Name(NAME_HEADERS_TOGGLE)
     @Description("This will include headers data in CSV. Considers 1st column as header")
     private Boolean headersToggle;
 
-    @Name("delimiter")
+    @Name(NAME_DELIMITER)
     @Description("Choose delimiter symbol used in CSV File.")
     private String delimiter;
 
