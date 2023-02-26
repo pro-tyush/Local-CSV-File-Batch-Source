@@ -81,7 +81,7 @@ public class HTTPConnector implements DirectConnector {
 
     public BrowseDetail browse(ConnectorContext connectorContext, BrowseRequest browseRequest) throws IOException {
         String path = browseRequest.getPath();
-        path = path.equals(PATH_SEPARATOR) ? path + endPoint : path; //redirect / to endPoint, note: default endPoint is /
+        path = path.equals(PATH_SEPARATOR) ? path + endPoint : path; //redirect "/" to endPoint, note: default endPoint is /
         Request request = okHttpHandler.generateRequest(okHttpHandler.cleanUrl(baseUrl + PATH_SEPARATOR + path));
         Response response = okHttpHandler.generateResponse(request);
         String responseString = response.body().string();
@@ -108,7 +108,7 @@ public class HTTPConnector implements DirectConnector {
         String localPath = connectorSpecRequest.getPath();
         Map<String, String> pluginProps = new HashMap<>();
         pluginProps.put(LocalFilePluginConfig.NAME_REFERENCE_NAME, localPath.substring(localPath.lastIndexOf(PATH_SEPARATOR) + 1));
-        pluginProps.put(LocalFilePluginConfig.NAME_FILE_PATH, localPath);
+        pluginProps.put(LocalFilePluginConfig.NAME_FILE_PATH, okHttpHandler.cleanUrl(localPath));
 
         PluginSpec pluginSpec = new PluginSpec(LocalFileBatchSource.NAME, LocalFileBatchSource.PLUGIN_TYPE, pluginProps);
         return ConnectorSpec.builder().addRelatedPlugin(pluginSpec).build();
