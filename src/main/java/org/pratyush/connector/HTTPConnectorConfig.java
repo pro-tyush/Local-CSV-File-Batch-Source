@@ -19,9 +19,11 @@ package org.pratyush.connector;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
+import io.cdap.cdap.etl.api.FailureCollector;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.Null;
+import java.net.URISyntaxException;
 
 public class HTTPConnectorConfig extends PluginConfig {
     public static final String NAME_BASE_URL = "baseURL";
@@ -77,5 +79,24 @@ public class HTTPConnectorConfig extends PluginConfig {
 
     public String getAuthType() {
         return authType;
+    }
+
+    public void validateConnectorParams(FailureCollector failureCollector) {
+        //TODO Check why these don't work
+        if (baseURL.isEmpty() || baseURL == null)
+            failureCollector.addFailure("Base url is empty.", "Enter valid http url.");
+        if (endPoint.isEmpty() || endPoint == null)
+            failureCollector.addFailure("Endpoint is empty.", "Enter valid http endpoint or set default endpoint as '/'");
+        if (isAuthReqd() && (apiKey.isEmpty() || apiKey == null))
+            failureCollector.addFailure("Enter auth parameters", null);
+        HttpGsonHandler httpGsonHandler = new HttpGsonHandler(this);
+        try {
+            if (httpGsonHandler.isValidHttpString(baseURL)){
+                    //no-op
+            }
+        } catch (URISyntaxException e) {
+            failureCollector.addFailure(e.getMessage(),"Base Url isn't HTTP type.");
+        }
+
     }
 }

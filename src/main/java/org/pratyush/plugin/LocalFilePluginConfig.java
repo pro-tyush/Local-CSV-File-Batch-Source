@@ -20,6 +20,7 @@ import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
+import org.pratyush.util.CsvHelper;
 
 import java.io.File;
 
@@ -79,7 +80,14 @@ public class LocalFilePluginConfig extends PluginConfig {
     }
 
     public void validate(FailureCollector failureCollector) {
-        failureCollector.getOrThrowException();
+        //TODO Dynamically show delimiter field, only if file type CSV
+        CsvHelper csvHelper = new CsvHelper();
+        if (generateSchemaToggle && !csvHelper.isCsvFile(filePath)){
+            failureCollector.addFailure("Can not generate schema.", "File is not of type CSV.");
+        }
+        if (includeHeaders() && !csvHelper.isCsvFile(filePath)){
+            failureCollector.addFailure("Cannot include Headers", "File is not of type CSV.");
+        }
     }
 
 }

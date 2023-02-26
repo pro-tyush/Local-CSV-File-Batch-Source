@@ -22,6 +22,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class HttpGsonHandler {
     private static final OkHttpClient okHttpClient;
@@ -62,5 +64,20 @@ public class HttpGsonHandler {
         String regex = "(?<!(http:|https:))" + HTTPConnector.PATH_SEPARATOR + "{2,}";
         return url.replaceAll(regex, HTTPConnector.PATH_SEPARATOR);
         //cleans url by removing extra separators except when preceded by http or https. http://a.com///b -> http://a.com/b
+    }
+
+    public boolean isValidHttpString(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+        String scheme = uri.getScheme();
+        if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
+            return false;
+        }
+        if (uri.getHost() == null) {
+            return false;
+        }
+        if (uri.getPath() == null) {
+            return false;
+        }
+        return true;
     }
 }

@@ -68,6 +68,7 @@ public class HTTPConnector implements DirectConnector {
     @Override
     public void test(ConnectorContext connectorContext) throws ValidationException {
         FailureCollector collector = connectorContext.getFailureCollector();
+        connectorConfig.validateConnectorParams(collector);
         Request request = okHttpHandler.generateRequest(okHttpHandler.cleanUrl(baseUrl + connectorConfig.getEndPoint()));
         try (Response response = okHttpHandler.generateResponse(request)) {
             if (!response.isSuccessful()) {
@@ -109,7 +110,7 @@ public class HTTPConnector implements DirectConnector {
         Map<String, String> pluginProps = new HashMap<>();
         pluginProps.put(LocalFilePluginConfig.NAME_REFERENCE_NAME, localPath.substring(localPath.lastIndexOf(PATH_SEPARATOR) + 1));
         pluginProps.put(LocalFilePluginConfig.NAME_FILE_PATH, okHttpHandler.cleanUrl(localPath));
-
+        //TODO Set Schema here, Add options windows (delimiter etc)
         PluginSpec pluginSpec = new PluginSpec(LocalFileBatchSource.NAME, LocalFileBatchSource.PLUGIN_TYPE, pluginProps);
         return ConnectorSpec.builder().addRelatedPlugin(pluginSpec).build();
     }
