@@ -53,7 +53,7 @@ import java.util.List;
 @Name(LocalFileBatchSource.NAME)
 @Description("Reads data from Local File, generates schemas for csv only.")
 public class LocalFileBatchSource extends BatchSource<LongWritable, Text, StructuredRecord> {
-
+//TODO CHECK ABSTRACT STYLE UNDER FORMATS
     public static final String NAME = "LocalFile";
     private final LocalFilePluginConfig pluginConfig;
 
