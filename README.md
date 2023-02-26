@@ -13,5 +13,6 @@ that http connector fetches file paths and passes it to plugin.<br>
 
 ## Starting the node server<br>
 - Move to node-http-server directory<br>
+- `npm install`<br>
 - `npm start`<br>
 - Now you should be able to use connection through Wrangler connection management.

@@ -20,6 +20,7 @@
           "label": "Endpoint",
           "name": "endPoint",
           "widget-attributes": {
+            "default": "/",
             "placeholder": "Enter endpoint."
           }
         }

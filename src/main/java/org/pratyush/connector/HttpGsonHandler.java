@@ -26,7 +26,7 @@ import java.io.IOException;
 public class HttpGsonHandler {
     private static final OkHttpClient okHttpClient;
     private static final Gson gson;
-    private static final  String AUTH_HEADER = "Authorization";
+    private static final String AUTH_HEADER = "Authorization";
 
     static {
         okHttpClient = new OkHttpClient();
@@ -41,7 +41,7 @@ public class HttpGsonHandler {
         this.connectorConfig = connectorConfig;
     }
 
-    public  Gson getGsonObj(){
+    public Gson getGsonObj() {
         return gson;
     }
 
@@ -58,4 +58,9 @@ public class HttpGsonHandler {
         return okHttpClient.newCall(request).execute();
     }
 
+    public String cleanUrl(String url) {
+        String regex = "(?<!(http:|https:))" + HTTPConnector.PATH_SEPARATOR + "{2,}";
+        return url.replaceAll(regex, HTTPConnector.PATH_SEPARATOR);
+        //cleans url by removing extra separators except when preceded by http or https. http://a.com///b -> http://a.com/b
+    }
 }

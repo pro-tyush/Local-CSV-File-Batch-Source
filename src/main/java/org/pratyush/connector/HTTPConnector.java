@@ -45,14 +45,17 @@ public class HTTPConnector implements DirectConnector {
     public static final String NAME = "HTTP";
     private final HttpGsonHandler okHttpHandler;
     private String baseUrl;
+
+    private String endPoint;
     private final HTTPConnectorConfig connectorConfig;
-    private static final String PATH_SEPARATOR = "/";
+    public static final String PATH_SEPARATOR = "/";
     private static final int MAX_SAMPLE_LIMIT = 1000;
 
     public HTTPConnector(HTTPConnectorConfig connectorConfig) {
         this.connectorConfig = connectorConfig;
         okHttpHandler = new HttpGsonHandler(connectorConfig);
         baseUrl = getBaseUrl(connectorConfig.getBaseURL());
+        endPoint = connectorConfig.getEndPoint();
     }
 
     private String getBaseUrl(String baseUrl) {
@@ -65,7 +68,7 @@ public class HTTPConnector implements DirectConnector {
     @Override
     public void test(ConnectorContext connectorContext) throws ValidationException {
         FailureCollector collector = connectorContext.getFailureCollector();
-        Request request = okHttpHandler.generateRequest(baseUrl + connectorConfig.getEndPoint());
+        Request request = okHttpHandler.generateRequest(okHttpHandler.cleanUrl(baseUrl + connectorConfig.getEndPoint()));
         try (Response response = okHttpHandler.generateResponse(request)) {
             if (!response.isSuccessful()) {
                 collector.addFailure("Request Failed", "Check BaseUrl, Endpoint" + (connectorConfig.isAuthReqd() ? " and Auth" : ""));
@@ -78,7 +81,8 @@ public class HTTPConnector implements DirectConnector {
 
     public BrowseDetail browse(ConnectorContext connectorContext, BrowseRequest browseRequest) throws IOException {
         String path = browseRequest.getPath();
-        Request request = okHttpHandler.generateRequest(baseUrl + PATH_SEPARATOR + path);
+        path = path.equals(PATH_SEPARATOR) ? path + endPoint : path; //redirect / to endPoint, note: default endPoint is /
+        Request request = okHttpHandler.generateRequest(okHttpHandler.cleanUrl(baseUrl + PATH_SEPARATOR + path));
         Response response = okHttpHandler.generateResponse(request);
         String responseString = response.body().string();
         Gson gson = okHttpHandler.getGsonObj();

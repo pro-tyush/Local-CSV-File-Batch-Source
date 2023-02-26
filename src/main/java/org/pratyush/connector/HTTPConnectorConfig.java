@@ -21,6 +21,7 @@ import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.plugin.PluginConfig;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 
 public class HTTPConnectorConfig extends PluginConfig {
     public static final String NAME_BASE_URL = "baseURL";

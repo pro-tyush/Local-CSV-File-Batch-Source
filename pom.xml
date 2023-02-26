@@ -388,6 +388,7 @@
                                 <exclude>*/*.iml</exclude>
                                 <exclude>**/*.trc</exclude>
                                 <exclude>**/lib/**</exclude>
+                                <exclude>node-http-server/</exclude>
                             </excludes>
                         </configuration>
                     </execution>
