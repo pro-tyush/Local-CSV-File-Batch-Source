@@ -1,0 +1,2 @@
+2023-02-20 16:37:02,356 - DEBUG [main:i.c.c.s.a.c.AbstractAuthenticationClient@158] - Try to get the authentication URI from the gateway server: http://mac.local:11015/ping.
+2023-02-20 16:37:02,373 - DEBUG [main:i.c.c.s.a.c.AbstractAuthenticationClient@161] - Got response 200 - OK from http://mac.local:11015/ping
