@@ -25,7 +25,6 @@ import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.cdap.etl.api.connector.*;
 import io.cdap.cdap.etl.api.validation.ValidationException;
-import io.cdap.plugin.format.connector.AbstractFileConnector;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.pratyush.plugin.LocalFileBatchSource;
@@ -52,11 +51,14 @@ public class HTTPConnector implements DirectConnector {
     public static final String PATH_SEPARATOR = "/";
     private static final int MAX_SAMPLE_LIMIT = 1000;
 
+    private CsvHelper csvHelper;
+
     public HTTPConnector(HTTPConnectorConfig connectorConfig) {
         this.connectorConfig = connectorConfig;
         okHttpHandler = new HttpGsonHandler(connectorConfig);
         baseUrl = getBaseUrl(connectorConfig.getBaseURL());
         endPoint = connectorConfig.getEndPoint();
+        csvHelper = new CsvHelper();
     }
 
     private String getBaseUrl(String baseUrl) {
@@ -113,25 +115,39 @@ public class HTTPConnector implements DirectConnector {
         pluginProps.put(LocalFilePluginConfig.NAME_FILE_PATH, okHttpHandler.cleanUrl(localPath));
         //TODO Add options windows (delimiter etc)
         PluginSpec pluginSpec = new PluginSpec(LocalFileBatchSource.NAME, LocalFileBatchSource.PLUGIN_TYPE, pluginProps);
-        return ConnectorSpec.builder().setSchema(LocalFileBatchSource.DEFAULT_SCHEMA).addRelatedPlugin(pluginSpec).build();
+        Schema pluginSchema = generateSchemaForPlugin(localPath,connectorContext.getFailureCollector());
+
+        return ConnectorSpec.builder().setSchema(pluginSchema).addRelatedPlugin(pluginSpec).build();
+    }
+
+    private Schema generateSchemaForPlugin(String path, FailureCollector collector) {
+        Request request = okHttpHandler.generateRequest(baseUrl + path);
+        try {
+            Response response = okHttpHandler.generateResponse(request);
+            if (csvHelper.isCsvFile(path))
+                return csvHelper.generateSchemaFromCsv(response.body().string(), ",");
+        } catch (IOException e) {
+            collector.addFailure(e.getMessage(),null);
+        }
+        return LocalFileBatchSource.DEFAULT_SCHEMA;
     }
 
     @Override
-    public List<StructuredRecord> sample(ConnectorContext connectorContext, SampleRequest sampleRequest) throws IOException {
+    public List<StructuredRecord> sample(ConnectorContext connectorContext, SampleRequest sampleRequest) throws
+            IOException {
         Request request = okHttpHandler.generateRequest(baseUrl + sampleRequest.getPath());
         Response response = okHttpHandler.generateResponse(request);
         String responseString = response.body().string();
         String[] responseLines = responseString.split("\n");
-        CsvHelper csvHelper = new CsvHelper();
 
         int sampleLimit = Math.min(responseLines.length, MAX_SAMPLE_LIMIT);
         if (csvHelper.isCsvFile(sampleRequest.getPath()))
-            return sampleCsv(responseLines, sampleLimit, csvHelper);
+            return sampleCsv(responseLines, sampleLimit);
         else
             return sampleFile(responseLines, sampleLimit);
     }
 
-    private List<StructuredRecord> sampleCsv(String[] csvLines, int sampleLimit, CsvHelper csvHelper) {
+    private List<StructuredRecord> sampleCsv(String[] csvLines, int sampleLimit) {
         Schema schema = csvHelper.generateSchemaFromCsv(csvLines[0], ",");
         List<StructuredRecord> structuredRecordList = new ArrayList<>();
         for (int i = 1; i < sampleLimit; i++) {
