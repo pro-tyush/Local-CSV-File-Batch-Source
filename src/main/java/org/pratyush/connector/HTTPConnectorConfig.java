@@ -82,7 +82,6 @@ public class HTTPConnectorConfig extends PluginConfig {
     }
 
     public void validateConnectorParams(FailureCollector failureCollector) {
-        //TODO Check why these don't work
         if (baseURL == null || baseURL.isEmpty())
             failureCollector.addFailure("Base url is empty.", "Enter valid http url.");
         if (endPoint == null || endPoint.isEmpty())
