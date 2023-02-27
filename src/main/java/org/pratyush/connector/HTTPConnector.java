@@ -72,11 +72,14 @@ public class HTTPConnector implements DirectConnector {
     public void test(ConnectorContext connectorContext) throws ValidationException {
         FailureCollector collector = connectorContext.getFailureCollector();
         connectorConfig.validateConnectorParams(collector);
+        if (!collector.getValidationFailures().isEmpty())
+            return; //if errors found stop execution
         Request request = okHttpHandler.generateRequest(okHttpHandler.cleanUrl(baseUrl + connectorConfig.getEndPoint()));
-        try (Response response = okHttpHandler.generateResponse(request)) {
-            if (!response.isSuccessful()) {
+        try {
+            Response response = okHttpHandler.generateResponse(request);
+            if (!response.isSuccessful())
                 collector.addFailure("Request Failed", "Check BaseUrl, Endpoint" + (connectorConfig.isAuthReqd() ? " and Auth" : ""));
-            }
+
         } catch (IOException e) {
             collector.addFailure(e.getMessage(), null);
         }
@@ -115,7 +118,7 @@ public class HTTPConnector implements DirectConnector {
         pluginProps.put(LocalFilePluginConfig.NAME_FILE_PATH, okHttpHandler.cleanUrl(localPath));
         //TODO Add options windows (delimiter etc)
         PluginSpec pluginSpec = new PluginSpec(LocalFileBatchSource.NAME, LocalFileBatchSource.PLUGIN_TYPE, pluginProps);
-        Schema pluginSchema = generateSchemaForPlugin(localPath,connectorContext.getFailureCollector());
+        Schema pluginSchema = generateSchemaForPlugin(localPath, connectorContext.getFailureCollector());
 
         return ConnectorSpec.builder().setSchema(pluginSchema).addRelatedPlugin(pluginSpec).build();
     }
@@ -127,7 +130,7 @@ public class HTTPConnector implements DirectConnector {
             if (csvHelper.isCsvFile(path))
                 return csvHelper.generateSchemaFromCsv(response.body().string(), ",");
         } catch (IOException e) {
-            collector.addFailure(e.getMessage(),null);
+            collector.addFailure(e.getMessage(), null);
         }
         return LocalFileBatchSource.DEFAULT_SCHEMA;
     }

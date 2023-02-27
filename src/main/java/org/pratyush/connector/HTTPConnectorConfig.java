@@ -83,20 +83,18 @@ public class HTTPConnectorConfig extends PluginConfig {
 
     public void validateConnectorParams(FailureCollector failureCollector) {
         //TODO Check why these don't work
-        if (baseURL.isEmpty() || baseURL == null)
+        if (baseURL == null || baseURL.isEmpty())
             failureCollector.addFailure("Base url is empty.", "Enter valid http url.");
-        if (endPoint.isEmpty() || endPoint == null)
+        if (endPoint == null || endPoint.isEmpty())
             failureCollector.addFailure("Endpoint is empty.", "Enter valid http endpoint or set default endpoint as '/'");
-        if (isAuthReqd() && (apiKey.isEmpty() || apiKey == null))
+        if (isAuthReqd() && (apiKey == null || apiKey.isEmpty()))
             failureCollector.addFailure("Enter auth parameters", null);
         HttpGsonHandler httpGsonHandler = new HttpGsonHandler(this);
         try {
-            if (httpGsonHandler.isValidHttpString(baseURL)){
-                    //no-op
-            }
+            if (!httpGsonHandler.isValidHttpString(baseURL))
+                failureCollector.addFailure("Base Url isn't HTTP type.", "Use HTTP Url only");
         } catch (URISyntaxException e) {
-            failureCollector.addFailure(e.getMessage(),"Base Url isn't HTTP type.");
+            failureCollector.addFailure(e.getMessage(), null);
         }
-
     }
 }
