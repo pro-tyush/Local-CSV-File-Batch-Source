@@ -25,6 +25,7 @@ import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.cdap.etl.api.connector.*;
 import io.cdap.cdap.etl.api.validation.ValidationException;
+import io.cdap.plugin.format.connector.AbstractFileConnector;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.pratyush.plugin.LocalFileBatchSource;
@@ -110,9 +111,9 @@ public class HTTPConnector implements DirectConnector {
         Map<String, String> pluginProps = new HashMap<>();
         pluginProps.put(LocalFilePluginConfig.NAME_REFERENCE_NAME, localPath.substring(localPath.lastIndexOf(PATH_SEPARATOR) + 1));
         pluginProps.put(LocalFilePluginConfig.NAME_FILE_PATH, okHttpHandler.cleanUrl(localPath));
-        //TODO Set Schema here, Add options windows (delimiter etc)
+        //TODO Add options windows (delimiter etc)
         PluginSpec pluginSpec = new PluginSpec(LocalFileBatchSource.NAME, LocalFileBatchSource.PLUGIN_TYPE, pluginProps);
-        return ConnectorSpec.builder().addRelatedPlugin(pluginSpec).build();
+        return ConnectorSpec.builder().setSchema(LocalFileBatchSource.DEFAULT_SCHEMA).addRelatedPlugin(pluginSpec).build();
     }
 
     @Override

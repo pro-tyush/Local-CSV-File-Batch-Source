@@ -82,6 +82,16 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/pratyush/plugin/LocalFilePluginConfig.java</url>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/pratyush/plugin/LocalFileBatchSource.java</url>
+          <line>138</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/pratyush/plugin/LocalFileBatchSource.java</url>
+          <line>139</line>
+          <option name="timeStamp" value="57" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

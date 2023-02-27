@@ -25,6 +25,9 @@
           "label": "Path",
           "name": "filePath",
           "widget-type": "text-box"
+        },
+        {
+
         }
       ]
     },
@@ -78,6 +81,12 @@
           }
         }
       ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "schema",
+      "widget-type": "schema"
     }
   ]
 }

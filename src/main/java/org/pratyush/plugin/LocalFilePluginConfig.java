@@ -18,6 +18,7 @@ package org.pratyush.plugin;
 
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Name;
+import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
 import org.pratyush.util.CsvHelper;
@@ -51,12 +52,15 @@ public class LocalFilePluginConfig extends PluginConfig {
     @Description("Choose delimiter symbol used in CSV File.")
     private String delimiter;
 
-    public LocalFilePluginConfig(String referenceName, String filePath, Boolean generateSchemaToggle, Boolean headersToggle, String delimiter) {
+    private Schema schema;
+
+    public LocalFilePluginConfig(String referenceName, String filePath, Boolean generateSchemaToggle, Boolean headersToggle, String delimiter, Schema schema) {
         this.referenceName = referenceName;
         this.filePath = filePath;
         this.generateSchemaToggle = generateSchemaToggle;
         this.headersToggle = headersToggle;
         this.delimiter = delimiter;
+        this.schema = schema;
     }
 
     public String getReferenceName() {
@@ -82,10 +86,10 @@ public class LocalFilePluginConfig extends PluginConfig {
     public void validate(FailureCollector failureCollector) {
         //TODO Dynamically show delimiter field, only if file type CSV
         CsvHelper csvHelper = new CsvHelper();
-        if (generateSchemaToggle && !csvHelper.isCsvFile(filePath)){
+        if (generateSchemaToggle && !csvHelper.isCsvFile(filePath)) {
             failureCollector.addFailure("Can not generate schema.", "File is not of type CSV.");
         }
-        if (includeHeaders() && !csvHelper.isCsvFile(filePath)){
+        if (includeHeaders() && !csvHelper.isCsvFile(filePath)) {
             failureCollector.addFailure("Cannot include Headers", "File is not of type CSV.");
         }
     }
