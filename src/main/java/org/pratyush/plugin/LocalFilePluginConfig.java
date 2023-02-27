@@ -84,7 +84,6 @@ public class LocalFilePluginConfig extends PluginConfig {
     }
 
     public void validate(FailureCollector failureCollector) {
-        //TODO Dynamically show delimiter field, only if file type CSV
         CsvHelper csvHelper = new CsvHelper();
         if (generateSchemaToggle && !csvHelper.isCsvFile(filePath)) {
             failureCollector.addFailure("Can not generate schema.", "File is not of type CSV.");
